@@ -1,1 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Rumana — June 19</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#120a1e;
+  --white:#fff8fb;
+  --gold:#ff7eb6;
+  --gold2:#ffb86b;
+  --gold3:#ffe27a;
+  --rose:#c084fc;
+  --fog:rgba(255,248,251,.06);
+  --line:rgba(255,126,182,.22);
+  --muted:rgba(255,248,251,.5);
+  --faint:rgba(255,248,251,.22);
+  --c1:#ff7eb6;
+  --c2:#7ee8fa;
+  --c3:#ffe27a;
+  --c4:#c084fc;
+  --c5:#7affc4;
+}
+html{background:linear-gradient(135deg,#1a0b2e,#2d0a35,#0f1b3c,#1a0b2e)}
+body::before{
+  content:'';position:fixed;inset:0;z-index:-1;
+  background:linear-gradient(125deg,#1a0b2e 0%,#3a0f4d 25%,#0f2a4a 50%,#3a0f2e 75%,#1a0b2e 100%);
+  background-size:400% 400%;
+  animation:gradientShift 22s ease infinite;
+}
+@keyframes gradientShift{
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+html{scroll-behavior:smooth;background:var(--ink)}
+body{
+  background:var(--ink);color:var(--white);
+  font-family:'Inter',sans-serif;
+  font-weight:300;
+  overflow-x:hidden;
+  cursor:none;
+}
 
+/* ─── CURSOR ─── */
+#cur,#cur2{position:fixed;border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%)}
+#cur{width:6px;height:6px;background:var(--gold3);transition:width.2s,height.2s,opacity.2s}
+#cur2{width:30px;height:30px;border:1px solid rgba(184,148,106,.5);transition:left.1s cubic-bezier(.23,1,.32,1),top.1s cubic-bezier(.23,1,.32,1),width.3s,height.3s}
+body:has(a:hover) #cur,body:has(button:hover) #cur{width:14px;height:14px;opacity:.7}
+
+/* ─── AMBIENT CANVAS ─── */
+#bg{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.7}
+
+/* ─── LOADER ─── */
+#loader{
+  position:fixed;inset:0;z-index:10000;
+  background:var(--ink);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  transition:opacity 1.2s ease,visibility 1.2s ease;
+}
+#loader.out{opacity:0;visibility:hidden}
+.l-name{
+  font-family:'Playfair Display',serif;font-size:clamp(3rem,10vw,6.5rem);
+  font-weight:400;letter-spacing:.12em;
+  background:linear-gradient(160deg,var(--white) 0%,var(--gold3) 50%,var(--gold) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  opacity:0;animation:up .9s .3s forwards
+}
+.l-rule{
+  width:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  margin-top:1.4rem;
+  animation:expand 1.8s 1s cubic-bezier(.4,0,.2,1) forwards
+}
+@keyframes expand{to{width:200px}}
+.l-sub{
+  margin-top:1.2rem;
+  font-size:.68rem;letter-spacing:.5em;text-transform:uppercase;
+  color:var(--muted);opacity:0;animation:up .6s 1.4s forwards
+}
+
+/* ─── WRAPPER ─── */
+#app{position:relative;z-index:1}
+
+/* ─── HERO ─── */
+#hero{
+  min-height:100svh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:0 7vw;text-align:center;
+  position:relative;
+}
+.h-eyebrow{
+  font-size:.68rem;letter-spacing:.55em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:2.5rem;
+  opacity:0;animation:up .6s 3.5s forwards
+}
+.h-name{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(4.5rem,16vw,11rem);
+  font-weight:900;line-height:.93;
+  letter-spacing:-.025em;
+  background:linear-gradient(170deg,var(--white) 0%,var(--gold3) 30%,var(--gold2) 60%,var(--rose) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  opacity:0;animation:nameIn 1.4s 3.6s cubic-bezier(.16,1,.3,1) forwards;
+  will-change:transform;
+}
+.h-glow{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(4.5rem,16vw,11rem);
+  font-weight:900;line-height:.93;
+  letter-spacing:-.025em;
+  position:absolute;
+  background:linear-gradient(170deg,var(--white),var(--gold3),var(--gold2),var(--rose));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  filter:blur(28px);opacity:.2;
+  pointer-events:none;user-select:none;
+  animation:nameIn 1.4s 3.6s cubic-bezier(.16,1,.3,1) forwards;
+  opacity:0;
+}
+.h-line{
+  width:1px;height:60px;
+  background:linear-gradient(to bottom,transparent,var(--gold),transparent);
+  margin:2.2rem auto;
+  opacity:0;animation:up .6s 4.2s forwards
+}
+.h-sub{
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:clamp(1rem,2.8vw,1.5rem);
+  color:rgba(250,248,245,.6);line-height:1.5;
+  max-width:520px;margin:0 auto;
+  opacity:0;animation:up .8s 4.3s forwards
+}
+.h-date{
+  margin-top:1.4rem;
+  font-size:.68rem;letter-spacing:.4em;text-transform:uppercase;
+  color:var(--gold);opacity:0;animation:up .5s 4.7s forwards
+}
+.h-scroll{
+  position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:.5rem;
+  opacity:0;animation:up .5s 5s forwards;
+}
+.h-scroll span{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--faint)}
+.scroll-bar{width:1px;height:44px;background:linear-gradient(to bottom,var(--gold),transparent);animation:pulse 2s ease-in-out infinite}
+
+/* ─── AMBIENT ORBS ─── */
+.orb{position:absolute;border-radius:50%;pointer-events:none;filter:blur(90px);animation:drift 15s ease-in-out infinite}
+.o1{width:600px;height:600px;background:radial-gradient(circle,rgba(255,126,182,.18),transparent 65%);top:-180px;left:-180px;animation-delay:0s}
+.o2{width:450px;height:450px;background:radial-gradient(circle,rgba(126,232,250,.16),transparent 65%);bottom:-120px;right:-120px;animation-delay:-7s}
+.o3{width:320px;height:320px;background:radial-gradient(circle,rgba(192,132,252,.16),transparent 65%);top:45%;left:60%;animation-delay:-11s}
+
+/* ─── SECTION WRAPPER ─── */
+.sect{padding:clamp(7rem,14vw,11rem) 7vw}
+.sect-center{text-align:center}
+.label{
+  display:inline-block;font-size:.65rem;letter-spacing:.5em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:.9rem;
+}
+.title{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(2rem,5vw,3.5rem);font-weight:400;
+  color:var(--white);line-height:1.15;margin-bottom:0;
+}
+
+/* ─── COUNTDOWN ─── */
+#countdown{background:var(--ink)}
+.cd-wrap{
+  display:flex;justify-content:center;
+  gap:clamp(1.5rem,5vw,4rem);flex-wrap:wrap;
+  margin-top:3.5rem;
+}
+.cd-unit{display:flex;flex-direction:column;align-items:center;gap:.6rem}
+.cd-ring{position:relative;width:clamp(88px,16vw,120px);height:clamp(88px,16vw,120px)}
+.cd-ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.cd-ring circle{fill:none;stroke-width:1.5}
+.track{stroke:rgba(184,148,106,.1)}
+.prog{stroke:var(--gold2);stroke-linecap:round;transition:stroke-dashoffset .8s cubic-bezier(.4,0,.2,1)}
+.cd-num{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:'Playfair Display',serif;
+  font-size:clamp(1.5rem,3.5vw,2.2rem);font-weight:700;color:var(--gold3);
+  transition:transform .15s ease;
+}
+.cd-lbl{font-size:.6rem;letter-spacing:.35em;text-transform:uppercase;color:var(--muted)}
+.cd-born{
+  margin-top:3rem;padding:1.6rem 2.8rem;
+  border:1px solid var(--line);border-radius:100px;
+  display:inline-flex;align-items:center;gap:1.2rem;
+  background:rgba(184,148,106,.04);
+  font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);
+}
+.cd-born b{color:var(--gold3);font-weight:400;letter-spacing:.2em}
+.celebrate{
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:clamp(1.4rem,3.5vw,2.2rem);color:var(--gold3);
+  display:none;margin-top:2rem;
+}
+
+/* ─── DIVIDER ─── */
+.div-line{
+  display:flex;align-items:center;gap:1.8rem;
+  max-width:440px;margin:0 auto;padding:1rem 7vw;
+}
+.dl{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent)}
+.dg{font-size:.55rem;color:var(--gold);letter-spacing:.2em}
+
+/* ─── NUMBERS ─── */
+#numbers .grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:1px;margin-top:4rem;
+  border:1px solid var(--line);border-radius:20px;overflow:hidden;
+}
+.num-card{
+  padding:2.5rem 2rem;
+  background:rgba(250,248,245,.02);
+  position:relative;
+  opacity:0;transform:translateY(20px);
+  transition:opacity .7s,transform .7s,background .3s;
+}
+.num-card:hover{background:rgba(184,148,106,.04)}
+.num-card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:0;transition:opacity .3s
+}
+.num-card:hover::after{opacity:.4}
+.n-icon{font-size:1.2rem;margin-bottom:1.2rem;opacity:.5}
+.n-val{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(2rem,4.5vw,3rem);font-weight:700;
+  background:linear-gradient(135deg,var(--gold3),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  line-height:1;
+}
+.n-lbl{font-size:.68rem;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);margin-top:.5rem}
+.n-sub{font-size:.78rem;color:var(--faint);margin-top:.25rem;font-style:italic}
+
+/* ─── WISHES ─── */
+#wishes .w-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:1.5rem;margin-top:4rem;
+}
+.w-card{
+  padding:2.5rem 2.2rem;
+  background:rgba(250,248,245,.025);
+  border:1px solid var(--line);border-radius:20px;
+  position:relative;overflow:hidden;
+  opacity:0;transform:translateY(24px);
+  transition:opacity .7s,transform .7s,border-color .3s,background .3s;
+  text-align:left;
+}
+.w-card:hover{
+  border-color:rgba(184,148,106,.35);
+  background:rgba(184,148,106,.03);
+  transform:translateY(-4px) !important;
+}
+.w-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(212,176,128,.5),transparent);
+}
+.w-mark{
+  font-family:'Playfair Display',serif;font-size:3.5rem;line-height:.8;
+  color:var(--gold);opacity:.2;margin-bottom:.8rem;font-style:italic;
+}
+.w-text{
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:clamp(.95rem,2.2vw,1.12rem);line-height:1.75;
+  color:rgba(250,248,245,.78);
+}
+.w-from{
+  margin-top:1.5rem;font-size:.6rem;letter-spacing:.35em;
+  text-transform:uppercase;color:var(--gold);
+}
+
+/* ─── SURPRISE ─── */
+#surprise{text-align:center}
+.s-desc{
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:clamp(1rem,2.5vw,1.2rem);color:var(--muted);margin-bottom:3rem;line-height:1.7;
+}
+.s-btn{
+  position:relative;display:inline-flex;align-items:center;gap:1rem;
+  padding:1.1rem 2.8rem;border:1px solid rgba(184,148,106,.3);
+  border-radius:100px;background:transparent;cursor:none;
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:1.1rem;color:var(--gold3);
+  overflow:hidden;
+  transition:border-color .3s,transform .3s;
+}
+.s-btn:hover{border-color:rgba(184,148,106,.6);transform:scale(1.03)}
+.s-btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(184,148,106,.08),rgba(192,136,144,.05));
+  opacity:0;transition:opacity .3s
+}
+.s-btn:hover::before{opacity:1}
+.s-shimmer{
+  position:absolute;inset:0;
+  background:linear-gradient(105deg,transparent 35%,rgba(250,248,245,.06) 50%,transparent 65%);
+  animation:shimmer 3.5s ease-in-out infinite;
+}
+.s-msg{
+  max-width:580px;margin:3.5rem auto 0;
+  opacity:0;transform:translateY(16px);
+  transition:opacity .9s ease,transform .9s ease;
+}
+.s-msg.show{opacity:1;transform:none}
+.s-big{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(2rem,6vw,4rem);font-weight:400;
+  background:linear-gradient(160deg,var(--white),var(--gold3),var(--gold2),var(--rose));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  line-height:1.2;margin-bottom:1.2rem;
+}
+.s-sub{
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:clamp(.95rem,2.5vw,1.2rem);
+  color:rgba(250,248,245,.65);line-height:1.9;
+}
+
+/* ─── FOOTER ─── */
+footer{
+  padding:5rem 7vw 4rem;text-align:center;
+  border-top:1px solid var(--line);
+  position:relative;overflow:hidden;
+}
+.ft-name{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(3rem,10vw,7rem);font-weight:400;
+  background:linear-gradient(150deg,var(--gold3),var(--gold),var(--rose));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  opacity:.18;line-height:1;
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  pointer-events:none;user-select:none;
+}
+.ft-inner{position:relative}
+.ft-msg{
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.8vw,1.5rem);color:var(--muted);margin-bottom:1rem;
+}
+.ft-date{font-size:.65rem;letter-spacing:.4em;text-transform:uppercase;color:var(--gold);margin-top:.8rem}
+.ft-credit{margin-top:3rem;font-size:.6rem;letter-spacing:.25em;color:rgba(250,248,245,.12);text-transform:uppercase}
+
+/* ─── CONFETTI ─── */
+#cvc{position:fixed;inset:0;z-index:8000;pointer-events:none;display:none}
+
+/* ─── MUSIC BUTTON ─── */
+#musicBtn{
+  position:fixed;bottom:24px;right:24px;z-index:9500;
+  width:54px;height:54px;border-radius:50%;
+  border:1px solid var(--line);
+  background:linear-gradient(135deg,rgba(255,126,182,.18),rgba(126,232,250,.18));
+  backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--white);font-size:1.3rem;
+  transition:transform .3s,box-shadow .3s;
+  box-shadow:0 4px 24px rgba(255,126,182,.25);
+}
+#musicBtn:hover{transform:scale(1.08)}
+#musicBtn .bars{display:flex;align-items:flex-end;gap:3px;height:18px}
+#musicBtn .bars span{
+  display:block;width:3px;border-radius:2px;
+  background:linear-gradient(to top,var(--c1),var(--c3));
+  animation:eq 1s ease-in-out infinite;
+}
+#musicBtn.paused .bars span{animation-play-state:paused;height:4px!important}
+#musicBtn .bars span:nth-child(1){animation-duration:.8s}
+#musicBtn .bars span:nth-child(2){animation-duration:1.1s;animation-delay:-.3s}
+#musicBtn .bars span:nth-child(3){animation-duration:.9s;animation-delay:-.5s}
+#musicBtn .bars span:nth-child(4){animation-duration:1.2s;animation-delay:-.1s}
+@keyframes eq{
+  0%,100%{height:5px}
+  50%{height:18px}
+}
+
+/* ─── UTILS ─── */
+@keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+@keyframes nameIn{from{opacity:0;transform:translateY(32px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes drift{0%,100%{transform:translate(0,0)}40%{transform:translate(22px,-28px)}70%{transform:translate(-18px,18px)}}
+@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+.in{opacity:1!important;transform:none!important}
+
+@media(max-width:640px){
+  .cd-wrap{gap:1rem}
+  .cd-born{padding:1rem 1.5rem;font-size:.62rem}
+  #numbers .grid{grid-template-columns:1fr 1fr}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="cur2"></div>
+<canvas id="bg"></canvas>
+<canvas id="cvc"></canvas>
+
+<audio id="bgAudio" src="song.mp3" loop preload="auto"></audio>
+<button id="musicBtn" title="Toggle music" aria-label="Toggle background music">
+  <div class="bars"><span></span><span></span><span></span><span></span></div>
+</button>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="l-name">Rumana</div>
+  <div class="l-rule"></div>
+  <div class="l-sub">A celebration awaits</div>
+</div>
+
+<div id="app">
+
+  <!-- ══ HERO ══ -->
+  <section id="hero">
+    <div class="orb o1"></div>
+    <div class="orb o2"></div>
+    <div class="orb o3"></div>
+    <p class="h-eyebrow">Born June 19, 2007</p>
+    <div style="position:relative;line-height:.93">
+      <div class="h-glow" aria-hidden="true">Rumana</div>
+      <h1 class="h-name">Rumana</h1>
+    </div>
+    <div class="h-line"></div>
+    <p class="h-sub">Every star in the sky paused — just for a moment — on the day you arrived.</p>
+    <p class="h-date">19 · 06 · 2007</p>
+    <div class="h-scroll">
+      <div class="scroll-bar"></div>
+      <span>scroll</span>
+    </div>
+  </section>
+
+  <!-- ══ COUNTDOWN ══ -->
+  <section id="countdown" class="sect sect-center">
+    <span class="label">Until your day</span>
+    <h2 class="title">The Countdown</h2>
+    <div class="cd-wrap">
+      <div class="cd-unit">
+        <div class="cd-ring">
+          <svg viewBox="0 0 100 100" width="100%" height="100%">
+            <circle class="track" cx="50" cy="50" r="44"/>
+            <circle class="prog" id="rD" cx="50" cy="50" r="44" stroke-dasharray="276.5" stroke-dashoffset="276.5"/>
+          </svg>
+          <div class="cd-num" id="nD">--</div>
+        </div>
+        <div class="cd-lbl">Days</div>
+      </div>
+      <div class="cd-unit">
+        <div class="cd-ring">
+          <svg viewBox="0 0 100 100" width="100%" height="100%">
+            <circle class="track" cx="50" cy="50" r="44"/>
+            <circle class="prog" id="rH" cx="50" cy="50" r="44" stroke-dasharray="276.5" stroke-dashoffset="276.5"/>
+          </svg>
+          <div class="cd-num" id="nH">--</div>
+        </div>
+        <div class="cd-lbl">Hours</div>
+      </div>
+      <div class="cd-unit">
+        <div class="cd-ring">
+          <svg viewBox="0 0 100 100" width="100%" height="100%">
+            <circle class="track" cx="50" cy="50" r="44"/>
+            <circle class="prog" id="rM" cx="50" cy="50" r="44" stroke-dasharray="276.5" stroke-dashoffset="276.5"/>
+          </svg>
+          <div class="cd-num" id="nM">--</div>
+        </div>
+        <div class="cd-lbl">Minutes</div>
+      </div>
+      <div class="cd-unit">
+        <div class="cd-ring">
+          <svg viewBox="0 0 100 100" width="100%" height="100%">
+            <circle class="track" cx="50" cy="50" r="44"/>
+            <circle class="prog" id="rS" cx="50" cy="50" r="44" stroke-dasharray="276.5" stroke-dashoffset="276.5"/>
+          </svg>
+          <div class="cd-num" id="nS">--</div>
+        </div>
+        <div class="cd-lbl">Seconds</div>
+      </div>
+    </div>
+    <div style="margin-top:3rem">
+      <div class="cd-born">Born on a beautiful <b id="dobDay">Thursday</b> in <b>June</b></div>
+    </div>
+    <div class="celebrate" id="celeb">✦ Happy Birthday, Rumana ✦</div>
+  </section>
+
+  <div class="div-line"><div class="dl"></div><div class="dg">✦</div><div class="dl"></div></div>
+
+  <!-- ══ NUMBERS ══ -->
+  <section id="numbers" class="sect">
+    <div style="text-align:center">
+      <span class="label">The mathematics of you</span>
+      <h2 class="title">Your Life in Numbers</h2>
+    </div>
+    <div class="grid" id="numGrid"></div>
+  </section>
+
+  <div class="div-line"><div class="dl"></div><div class="dg">◇</div><div class="dl"></div></div>
+
+  <!-- ══ WISHES ══ -->
+  <section id="wishes" class="sect sect-center">
+    <span class="label">From the heart</span>
+    <h2 class="title">Birthday Wishes</h2>
+    <div class="w-grid">
+      <div class="w-card">
+        <div class="w-mark">"</div>
+        <p class="w-text">May every single one of your dreams know your name, and find its way to you this year, Rumana.</p>
+        <div class="w-from">✦ A heartfelt wish</div>
+      </div>
+      <div class="w-card">
+        <div class="w-mark">"</div>
+        <p class="w-text">You hold a rare kind of light — the kind that makes rooms feel warmer and moments feel softer. Never lose it.</p>
+        <div class="w-from">✦ With admiration</div>
+      </div>
+      <div class="w-card">
+        <div class="w-mark">"</div>
+        <p class="w-text">On this day, something beautiful was added to the world. And all these years later, it still is.</p>
+        <div class="w-from">✦ Always true</div>
+      </div>
+      <div class="w-card">
+        <div class="w-mark">"</div>
+        <p class="w-text">Like fine gold, you only grow more precious with time. Happy Birthday to someone truly extraordinary.</p>
+        <div class="w-from">✦ Forever yours</div>
+      </div>
+      <div class="w-card">
+        <div class="w-mark">"</div>
+        <p class="w-text">Some people arrive and immediately make the whole world feel like a better place. You are one of them.</p>
+        <div class="w-from">✦ Sincerely</div>
+      </div>
+      <div class="w-card">
+        <div class="w-mark">"</div>
+        <p class="w-text">May this birthday be the beginning of the most luminous chapter your story has ever held.</p>
+        <div class="w-from">✦ With love</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="div-line"><div class="dl"></div><div class="dg">✦</div><div class="dl"></div></div>
+
+  <!-- ══ SURPRISE ══ -->
+  <section id="surprise" class="sect">
+    <div style="text-align:center;max-width:600px;margin:0 auto">
+      <span class="label">Something special</span>
+      <h2 class="title" style="margin-bottom:1.5rem">A Surprise for You</h2>
+      <p class="s-desc">One tap away from a moment made just for you.</p>
+      <button class="s-btn" id="sBtn">
+        <div class="s-shimmer"></div>
+        <span style="font-size:1.2rem">✦</span>
+        <span>Reveal Surprise</span>
+      </button>
+      <div class="s-msg" id="sMsg">
+        <div class="s-big">Happy Birthday,<br>Rumana.</div>
+        <p class="s-sub">The world is richer, warmer, and more full of wonder because you exist in it. On your special day and every day — you are seen, you are loved, you are everything.</p>
+        <div style="margin-top:2rem;font-size:.65rem;letter-spacing:.4em;text-transform:uppercase;color:var(--gold)">June 19, 2007 — Forever celebrated</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ FOOTER ══ -->
+  <footer>
+    <div class="ft-name" aria-hidden="true">Rumana</div>
+    <div class="ft-inner">
+      <p class="ft-msg">To the one who makes the world more beautiful simply by being in it.</p>
+      <p class="ft-date">19 · June · 2007</p>
+      <p class="ft-credit">Made with quiet admiration ✦</p>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+// ── BACKGROUND MUSIC
+const bgAudio=document.getElementById('bgAudio');
+const musicBtn=document.getElementById('musicBtn');
+bgAudio.volume=0.45;
+
+function setPlayingUI(isPlaying){
+  musicBtn.classList.toggle('paused',!isPlaying);
+}
+
+function tryAutoplay(){
+  const p=bgAudio.play();
+  if(p!==undefined){
+    p.then(()=>setPlayingUI(true)).catch(()=>{
+      setPlayingUI(false);
+      // wait for first user interaction to start playback
+      const startOnInteract=()=>{
+        bgAudio.play().then(()=>setPlayingUI(true)).catch(()=>{});
+        ['click','touchstart','keydown','scroll'].forEach(ev=>document.removeEventListener(ev,startOnInteract));
+      };
+      ['click','touchstart','keydown','scroll'].forEach(ev=>document.addEventListener(ev,startOnInteract,{once:true}));
+    });
+  }
+}
+window.addEventListener('load',tryAutoplay);
+
+musicBtn.addEventListener('click',()=>{
+  if(bgAudio.paused){
+    bgAudio.play().then(()=>setPlayingUI(true)).catch(()=>{});
+  }else{
+    bgAudio.pause();
+    setPlayingUI(false);
+  }
+});
+
+// ── CURSOR
+const cur=document.getElementById('cur'),cur2=document.getElementById('cur2');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px'});
+(function lp(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;cur2.style.left=rx+'px';cur2.style.top=ry+'px';requestAnimationFrame(lp)})();
+
+// ── LOADER
+window.addEventListener('load',()=>{setTimeout(()=>{document.getElementById('loader').classList.add('out')},3000)});
+
+// ── BACKGROUND PARTICLES
+const cv=document.getElementById('bg'),c=cv.getContext('2d');
+let W,H,pts=[];
+function rsz(){W=cv.width=innerWidth;H=cv.height=innerHeight}
+rsz();window.addEventListener('resize',rsz);
+const cols=['rgba(255,126,182,','rgba(126,232,250,','rgba(255,226,122,','rgba(192,132,252,','rgba(122,255,196,'];
+class P{
+  constructor(){this.reset()}
+  reset(){
+    this.x=Math.random()*W;this.y=Math.random()*H;
+    this.vx=(Math.random()-.5)*.25;this.vy=(Math.random()-.5)*.25;
+    this.r=Math.random()*1.2+.3;
+    this.a=Math.random()*.2+.04;
+    this.col=cols[Math.floor(Math.random()*cols.length)];
+  }
+  tick(){
+    this.x+=this.vx;this.y+=this.vy;
+    if(this.x<0||this.x>W||this.y<0||this.y>H)this.reset();
+  }
+  draw(){
+    c.beginPath();c.arc(this.x,this.y,this.r,0,Math.PI*2);
+    c.fillStyle=this.col+this.a+')';c.fill();
+  }
+}
+for(let i=0;i<100;i++)pts.push(new P());
+function draw(){c.clearRect(0,0,W,H);pts.forEach(p=>{p.tick();p.draw()});requestAnimationFrame(draw)}
+draw();
+
+// ── HERO PARALLAX
+const hn=document.querySelector('.h-name'),hg=document.querySelector('.h-glow');
+const orbs=document.querySelectorAll('.orb');
+document.getElementById('hero').addEventListener('mousemove',e=>{
+  const px=(e.clientX/innerWidth-.5),py=(e.clientY/innerHeight-.5);
+  hn.style.transform=`translate(${px*14}px,${py*10}px)`;
+  hg.style.transform=`translate(${px*14}px,${py*10}px)`;
+  orbs.forEach((o,i)=>{const d=(i+1)*.3;o.style.transform=`translate(${px*20*d}px,${py*20*d}px)`});
+});
+window.addEventListener('deviceorientation',e=>{
+  const px=(e.gamma||0)/45*.5,py=(e.beta||0)/45*.5;
+  hn.style.transform=`translate(${px*12}px,${py*8}px)`;
+});
+
+// ── COUNTDOWN
+const C=276.5;
+function nxtBd(){
+  const n=new Date(),y=n.getFullYear();
+  let bd=new Date(y,5,19);
+  if(bd<=n)bd=new Date(y+1,5,19);
+  return bd;
+}
+function ring(id,val,max){
+  const el=document.getElementById(id);
+  if(el)el.style.strokeDashoffset=C-(val/max)*C;
+}
+function p2(n){return String(n).padStart(2,'0')}
+function tick(){
+  const now=new Date(),bd=nxtBd(),diff=bd-now;
+  if(diff<=0){
+    ['nD','nH','nM','nS'].forEach(id=>{document.getElementById(id).textContent='00'});
+    document.getElementById('celeb').style.display='block';
+    return;
+  }
+  const d=Math.floor(diff/864e5);
+  const h=Math.floor((diff%864e5)/36e5);
+  const m=Math.floor((diff%36e5)/6e4);
+  const s=Math.floor((diff%6e4)/1e3);
+  document.getElementById('nD').textContent=p2(d);
+  document.getElementById('nH').textContent=p2(h);
+  document.getElementById('nM').textContent=p2(m);
+  document.getElementById('nS').textContent=p2(s);
+  ring('rD',d,365);ring('rH',h,24);ring('rM',m,60);ring('rS',s,60);
+}
+tick();setInterval(tick,1000);
+// Day of week born
+const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+document.getElementById('dobDay').textContent=days[new Date(2007,5,19).getDay()];
+
+// ── STATS
+(function(){
+  const dob=new Date(2007,5,19),now=new Date();
+  const ms=now-dob;
+  const totalDays=Math.floor(ms/864e5);
+  const age=now.getFullYear()-2007-(now<new Date(now.getFullYear(),5,19)?1:0);
+  const items=[
+    {icon:'✦',val:age,lbl:'Years Young',sub:'Each one a masterpiece'},
+    {icon:'◇',val:totalDays.toLocaleString(),lbl:'Days Lived',sub:'Every one a story'},
+    {icon:'✧',val:Math.floor(ms/36e5).toLocaleString(),lbl:'Hours of Wonder',sub:'Of you in this world'},
+    {icon:'◈',val:Math.floor(totalDays/7).toLocaleString(),lbl:'Weeks of Beauty',sub:'And counting'},
+    {icon:'✦',val:'Gemini',lbl:'Zodiac Sign',sub:'Curious · Expressive · Free'},
+    {icon:'◇',val:days[new Date(2007,5,19).getDay()],lbl:'Day Born',sub:'19 June 2007'},
+  ];
+  const g=document.getElementById('numGrid');
+  items.forEach((it,i)=>{
+    const d=document.createElement('div');
+    d.className='num-card';
+    d.style.transitionDelay=(i*.08)+'s';
+    d.innerHTML=`<div class="n-icon">${it.icon}</div><div class="n-val">${it.val}</div><div class="n-lbl">${it.lbl}</div><div class="n-sub">${it.sub}</div>`;
+    g.appendChild(d);
+  });
+})();
+
+// ── SCROLL REVEAL
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('in');
+      obs.unobserve(e.target);
+    }
+  });
+},{threshold:.1});
+document.querySelectorAll('.num-card,.w-card').forEach(el=>obs.observe(el));
+
+// ── CONFETTI
+const ccv=document.getElementById('cvc'),cc=ccv.getContext('2d');
+function launchConfetti(){
+  ccv.width=innerWidth;ccv.height=innerHeight;ccv.style.display='block';
+  const ps=Array.from({length:180},()=>({
+    x:Math.random()*ccv.width,y:ccv.height*(.2+Math.random()*.3),
+    vx:(Math.random()-.5)*5,vy:-(Math.random()*6+3),
+    w:Math.random()*9+4,h:Math.random()*5+2,
+    rot:Math.random()*360,rv:(Math.random()-.5)*10,
+    col:['#b8946a','#d4b080','#e8c890','#c08890','#faf8f5'][Math.floor(Math.random()*5)],
+    alpha:1
+  }));
+  let fr=0;
+  (function f(){
+    cc.clearRect(0,0,ccv.width,ccv.height);
+    ps.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;p.vy+=.12;p.rot+=p.rv;
+      if(fr>120)p.alpha=Math.max(0,p.alpha-.008);
+      cc.save();cc.translate(p.x,p.y);cc.rotate(p.rot*Math.PI/180);
+      cc.globalAlpha=p.alpha;cc.fillStyle=p.col;
+      cc.fillRect(-p.w/2,-p.h/2,p.w,p.h);cc.restore();
+    });
+    fr++;
+    if(fr<260)requestAnimationFrame(f);
+    else ccv.style.display='none';
+  })();
+}
+
+// ── SURPRISE
+document.getElementById('sBtn').addEventListener('click',()=>{
+  launchConfetti();
+  const m=document.getElementById('sMsg');
+  m.style.display='block';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>m.classList.add('show')));
+});
+</script>
+</body>
+</html>
