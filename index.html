@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Rumana — June 19</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          heading: ["'Instrument Serif'", 'serif'],
+          body: ['Barlow', 'sans-serif'],
+        },
+        borderRadius: {
+          DEFAULT: '9999px',
+        },
+      }
+    }
+  }
+</script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #000; color: #fff; overflow-x: hidden; }
+  #root { min-height: 100vh; }
+
+  /* ── Video background ── */
+  #bg-video-wrap {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  #bg-video-wrap video {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    opacity: 0.38;
+  }
+  #bg-video-wrap::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom,
+      rgba(0,0,0,0.55) 0%,
+      rgba(0,0,0,0.30) 40%,
+      rgba(0,0,0,0.55) 100%);
+  }
+
+  /* Make all sections transparent so the video shows through */
+  section, footer { background: transparent !important; }
+
+  .liquid-glass {
+    background: rgba(255,255,255,0.01);
+    background-blend-mode: luminosity;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: none;
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.1);
+    position: relative;
+    overflow: hidden;
+  }
+  .liquid-glass::before {
+    content: "";
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    padding: 1.4px;
+    background: linear-gradient(180deg,
+      rgba(255,255,255,0.45) 0%,
+      rgba(255,255,255,0.15) 20%,
+      rgba(255,255,255,0) 40%,
+      rgba(255,255,255,0) 60%,
+      rgba(255,255,255,0.15) 80%,
+      rgba(255,255,255,0.45) 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+  .liquid-glass-strong {
+    background: rgba(255,255,255,0.01);
+    background-blend-mode: luminosity;
+    backdrop-filter: blur(50px);
+    -webkit-backdrop-filter: blur(50px);
+    border: none;
+    box-shadow: 4px 4px 4px rgba(0,0,0,0.05), inset 0 1px 1px rgba(255,255,255,0.15);
+    position: relative;
+    overflow: hidden;
+  }
+  .liquid-glass-strong::before {
+    content: "";
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    padding: 1.4px;
+    background: linear-gradient(180deg,
+      rgba(255,255,255,0.5) 0%,
+      rgba(255,255,255,0.2) 20%,
+      rgba(255,255,255,0) 40%,
+      rgba(255,255,255,0) 60%,
+      rgba(255,255,255,0.2) 80%,
+      rgba(255,255,255,0.5) 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  @keyframes driftA { 0%,100%{transform:translate(0,0)} 40%{transform:translate(22px,-28px)} 70%{transform:translate(-18px,18px)} }
+  .orb { position:absolute; border-radius:50%; pointer-events:none; filter:blur(90px); animation:driftA 15s ease-in-out infinite; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/framer-motion@11.11.17/dist/framer-motion.js" crossorigin="anonymous"></script>
+<script>
+  window.Motion = window.FramerMotion || window.Motion;
+</script>
+</head>
+<body>
+
+<!-- Video background -->
+<div id="bg-video-wrap">
+  <video autoplay muted loop playsinline>
+    <source src="bg_video.mov" type="video/mov">
+  </video>
+</div>
+
+<div id="root" style="position:relative;z-index:1;"></div>
+
+<audio id="bgAudio" src="song.mp3" loop preload="auto" style="display:none"></audio>
+<script>
+  (function() {
+    var audio = document.getElementById('bgAudio');
+    audio.volume = 0.45;
+    audio.addEventListener('error', function() {
+      console.warn('[Rumana] song.mp3 not found — keep it in the same folder as index.html.');
+    });
+    function start() {
+      audio.play().catch(function(){});
+      window.removeEventListener('click', start);
+      window.removeEventListener('touchstart', start);
+    }
+    window.addEventListener('load', function() { audio.play().catch(function(){}); });
+    window.addEventListener('click', start);
+    window.addEventListener('touchstart', start);
+  })();
+</script>
+
+<!-- BlurText -->
+<script type="text/babel">
+const { motion, useInView } = window.Motion;
+
+window.BlurText = function BlurText({ text, className, as: Tag = 'p' }) {
+  const ref = React.useRef(null);
+  const isInView = useInView(ref, { threshold: 0.1, once: true });
+  const words = text.split(' ');
+
+  return (
+    <Tag
+      ref={ref}
+      style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', rowGap: '0.1em' }}
+      className={className}
+    >
+      {words.map((word, i) => (
+        <motion.span
+          key={i}
+          initial={{ filter: 'blur(10px)', opacity: 0, y: 50 }}
+          animate={isInView ? {
+            filter: ['blur(10px)', 'blur(5px)', 'blur(0px)'],
+            opacity: [0, 0.5, 1],
+            y: [50, -5, 0],
+          } : {}}
+          transition={{
+            duration: 0.7,
+            delay: (i * 100) / 1000,
+            ease: 'easeOut',
+            times: [0, 0.5, 1],
+          }}
+          style={{ display: 'inline-block', marginRight: '0.28em' }}
+        >
+          {word}
+        </motion.span>
+      ))}
+    </Tag>
+  );
+};
+</script>
+
+<!-- Music toggle button -->
+<script type="text/babel">
+window.MusicButton = function MusicButton() {
+  const [playing, setPlaying] = React.useState(true);
+  const toggle = () => {
+    const audio = document.getElementById('bgAudio');
+    if (audio.paused) { audio.play().catch(()=>{}); setPlaying(true); }
+    else { audio.pause(); setPlaying(false); }
+  };
+  return (
+    <button
+      onClick={toggle}
+      className="liquid-glass-strong fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full flex items-center justify-center hover:bg-white/5 transition-colors"
+      aria-label="Toggle background music"
+      title="Toggle music"
+    >
+      <div className="flex items-end gap-[3px]" style={{ height: 18 }}>
+        {[0,1,2,3].map(i => (
+          <span
+            key={i}
+            className="block w-[3px] rounded-full bg-white"
+            style={{
+              height: playing ? undefined : 4,
+              animation: playing ? `eq ${0.8 + i*0.13}s ease-in-out ${-i*0.2}s infinite` : 'none',
+            }}
+          />
+        ))}
+      </div>
+      <style>{`@keyframes eq {0%,100%{height:5px}50%{height:18px}}`}</style>
+    </button>
+  );
+};
+</script>
+
+<!-- Loader -->
+<script type="text/babel">
+const { motion: ml } = window.Motion;
+
+window.Loader = function Loader() {
+  const [out, setOut] = React.useState(false);
+  React.useEffect(() => {
+    const t = setTimeout(() => setOut(true), 2600);
+    return () => clearTimeout(t);
+  }, []);
+  return (
+    <ml.div
+      initial={{ opacity: 1 }}
+      animate={{ opacity: out ? 0 : 1 }}
+      transition={{ duration: 1, ease: 'easeInOut' }}
+      style={{ pointerEvents: out ? 'none' : 'auto', visibility: out ? 'hidden' : 'visible' }}
+      className="fixed inset-0 z-[9999] bg-black flex flex-col items-center justify-center"
+    >
+      <ml.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.9, delay: 0.3, ease: 'easeOut' }}
+        className="font-heading italic text-white text-6xl md:text-7xl tracking-[-2px]"
+      >
+        Rumana
+      </ml.div>
+      <ml.div
+        initial={{ width: 0 }}
+        animate={{ width: 200 }}
+        transition={{ duration: 1.4, delay: 1, ease: 'easeInOut' }}
+        className="h-px bg-gradient-to-r from-transparent via-white/60 to-transparent mt-6"
+      />
+      <ml.div
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 1.6, ease: 'easeOut' }}
+        className="mt-5 text-[11px] tracking-[0.5em] uppercase text-white/50 font-body"
+      >
+        A celebration awaits
+      </ml.div>
+    </ml.div>
+  );
+};
+</script>
+
+<!-- Navbar -->
+<script type="text/babel">
+window.Navbar = function Navbar() {
+  return (
+    <nav className="fixed top-4 left-0 right-0 z-50 px-8 lg:px-16 flex items-center justify-between">
+      <div className="liquid-glass w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
+        <span className="font-heading italic text-white text-xl">r</span>
+      </div>
+      <div className="liquid-glass rounded-full px-5 py-2 text-xs tracking-[0.3em] uppercase text-white/70 font-body hidden sm:block">
+        19 · June · 2007
+      </div>
+      <div className="w-12 h-12 flex-shrink-0" />
+    </nav>
+  );
+};
+</script>
+
+<!-- Hero -->
+<script type="text/babel">
+const { motion: mh } = window.Motion;
+const HMI = { filter: 'blur(10px)', opacity: 0, y: 20 };
+const HMA = { filter: 'blur(0px)', opacity: 1, y: 0 };
+
+window.HeroSection = function HeroSection() {
+  return (
+    <section className="relative min-h-screen overflow-hidden flex flex-col items-center justify-center text-center px-6">
+      <mh.p
+        initial={HMI} animate={HMA} transition={{ duration: 0.7, delay: 2.7, ease: 'easeOut' }}
+        className="text-[11px] tracking-[0.55em] uppercase text-white/60 font-body mb-8"
+      >
+        Born June 19, 2007
+      </mh.p>
+
+      <BlurText
+        text="Rumana"
+        as="h1"
+        className="font-heading italic text-white leading-[0.9] tracking-[-2px]"
+      />
+      <style>{`
+        h1.font-heading { font-size: clamp(4.5rem, 16vw, 11rem) !important; }
+      `}</style>
+
+      <mh.div
+        initial={{ height: 0, opacity: 0 }} animate={{ height: 60, opacity: 1 }}
+        transition={{ duration: 0.6, delay: 3.4, ease: 'easeOut' }}
+        className="w-px bg-gradient-to-b from-transparent via-white/50 to-transparent my-7"
+      />
+
+      <mh.p
+        initial={HMI} animate={HMA} transition={{ duration: 0.8, delay: 3.5, ease: 'easeOut' }}
+        className="font-heading italic text-white/70 text-lg md:text-2xl max-w-xl leading-relaxed"
+      >
+        Every star in the sky paused — just for a moment — on the day you arrived.
+      </mh.p>
+
+      <mh.p
+        initial={HMI} animate={HMA} transition={{ duration: 0.5, delay: 3.9, ease: 'easeOut' }}
+        className="mt-6 text-xs tracking-[0.4em] uppercase text-white/60 font-body"
+      >
+        19 · 06 · 2007
+      </mh.p>
+
+      <mh.div
+        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 4.2, ease: 'easeOut' }}
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+      >
+        <div className="w-px h-11" style={{background:'linear-gradient(to bottom, rgba(255,255,255,0.6), transparent)', animation:'pulse 2s ease-in-out infinite'}} />
+        <span className="text-[10px] tracking-[0.3em] uppercase text-white/30 font-body">scroll</span>
+        <style>{`@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}`}</style>
+      </mh.div>
+    </section>
+  );
+};
+</script>
+
+<!-- Countdown -->
+<script type="text/babel">
+const { motion: mcd, useInView: uivcd } = window.Motion;
+const C = 276.5;
+
+window.CountdownSection = function CountdownSection() {
+  const ref = React.useRef(null);
+  const inView = uivcd(ref, { threshold: 0.1, once: true });
+  const [vals, setVals] = React.useState({ d: '--', h: '--', m: '--', s: '--' });
+  const [offsets, setOffsets] = React.useState({ d: C, h: C, m: C, s: C });
+  const [celebrate, setCelebrate] = React.useState(false);
+  const [dobDay, setDobDay] = React.useState('');
+
+  React.useEffect(() => {
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    setDobDay(days[new Date(2007,5,19).getDay()]);
+
+    function nextBd() {
+      const n = new Date(), y = n.getFullYear();
+      let bd = new Date(y,5,19);
+      if (bd <= n) bd = new Date(y+1,5,19);
+      return bd;
+    }
+    function p2(n) { return String(n).padStart(2,'0'); }
+    function tick() {
+      const now = new Date(), bd = nextBd(), diff = bd - now;
+      if (diff <= 0) {
+        setVals({ d:'00', h:'00', m:'00', s:'00' });
+        setCelebrate(true);
+        return;
+      }
+      const d = Math.floor(diff/864e5);
+      const h = Math.floor((diff%864e5)/36e5);
+      const m = Math.floor((diff%36e5)/6e4);
+      const s = Math.floor((diff%6e4)/1e3);
+      setVals({ d:p2(d), h:p2(h), m:p2(m), s:p2(s) });
+      setOffsets({
+        d: C - (d/365)*C,
+        h: C - (h/24)*C,
+        m: C - (m/60)*C,
+        s: C - (s/60)*C,
+      });
+    }
+    tick();
+    const iv = setInterval(tick, 1000);
+    return () => clearInterval(iv);
+  }, []);
+
+  const units = [
+    { key:'d', label:'Days' },
+    { key:'h', label:'Hours' },
+    { key:'m', label:'Minutes' },
+    { key:'s', label:'Seconds' },
+  ];
+
+  return (
+    <section ref={ref} className="relative py-28 md:py-36 px-6 text-center">
+      <mcd.span
+        initial={{ opacity: 0, y: 14 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+        className="inline-block text-[11px] tracking-[0.5em] uppercase text-white/60 font-body mb-3"
+      >
+        Until your day
+      </mcd.span>
+      <mcd.h2
+        initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.7, delay: 0.1, ease: 'easeOut' }}
+        className="font-heading italic text-white text-4xl md:text-5xl"
+      >
+        The Countdown
+      </mcd.h2>
+
+      <mcd.div
+        initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.7, delay: 0.2, ease: 'easeOut' }}
+        className="flex justify-center gap-6 md:gap-10 flex-wrap mt-14"
+      >
+        {units.map(u => (
+          <div key={u.key} className="flex flex-col items-center gap-3">
+            <div className="liquid-glass relative rounded-full" style={{ width: 'clamp(88px,16vw,120px)', height: 'clamp(88px,16vw,120px)' }}>
+              <svg viewBox="0 0 100 100" width="100%" height="100%" style={{ position:'absolute', inset:0, transform:'rotate(-90deg)' }}>
+                <circle cx="50" cy="50" r="44" fill="none" strokeWidth="1.5" stroke="rgba(255,255,255,0.12)" />
+                <circle cx="50" cy="50" r="44" fill="none" strokeWidth="1.5" stroke="white" strokeLinecap="round"
+                  strokeDasharray={C} strokeDashoffset={offsets[u.key]}
+                  style={{ transition: 'stroke-dashoffset .8s cubic-bezier(.4,0,.2,1)' }} />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center font-heading italic text-white" style={{ fontSize: 'clamp(1.5rem,3.5vw,2.2rem)' }}>
+                {vals[u.key]}
+              </div>
+            </div>
+            <span className="text-[10px] tracking-[0.35em] uppercase text-white/50 font-body">{u.label}</span>
+          </div>
+        ))}
+      </mcd.div>
+
+      <div className="mt-12">
+        <div className="liquid-glass inline-flex items-center gap-3 px-7 py-4 rounded-full text-xs tracking-[0.25em] uppercase text-white/70 font-body">
+          Born on a beautiful <b className="text-white font-normal tracking-[0.2em]">{dobDay}</b> in <b className="text-white font-normal tracking-[0.2em]">June</b>
+        </div>
+      </div>
+
+      {celebrate && (
+        <div className="font-heading italic text-white text-2xl md:text-4xl mt-8">✦ Happy Birthday, Rumana ✦</div>
+      )}
+    </section>
+  );
+};
+</script>
+
+<!-- Divider -->
+<script type="text/babel">
+window.Divider = function Divider({ glyph }) {
+  return (
+    <div className="flex items-center gap-7 max-w-md mx-auto px-6 py-4">
+      <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+      <span className="text-xs text-white/50">{glyph}</span>
+      <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+    </div>
+  );
+};
+</script>
+
+<!-- Numbers -->
+<script type="text/babel">
+const { motion: mn, useInView: uivn } = window.Motion;
+
+window.NumbersSection = function NumbersSection() {
+  const ref = React.useRef(null);
+  const inView = uivn(ref, { threshold: 0.1, once: true });
+  const [items, setItems] = React.useState([]);
+
+  React.useEffect(() => {
+    const dob = new Date(2007,5,19), now = new Date();
+    const ms = now - dob;
+    const totalDays = Math.floor(ms/864e5);
+    const age = now.getFullYear() - 2007 - (now < new Date(now.getFullYear(),5,19) ? 1 : 0);
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    setItems([
+      { icon:'✦', val: age, lbl:'Years Young', sub:'Each one a masterpiece' },
+      { icon:'◇', val: totalDays.toLocaleString(), lbl:'Days Lived', sub:'Every one a story' },
+      { icon:'✧', val: Math.floor(ms/36e5).toLocaleString(), lbl:'Hours of Wonder', sub:'Of you in this world' },
+      { icon:'◈', val: Math.floor(totalDays/7).toLocaleString(), lbl:'Weeks of Beauty', sub:'And counting' },
+      { icon:'✦', val:'Gemini', lbl:'Zodiac Sign', sub:'Curious · Expressive · Free' },
+      { icon:'◇', val: days[new Date(2007,5,19).getDay()], lbl:'Day Born', sub:'19 June 2007' },
+    ]);
+  }, []);
+
+  return (
+    <section ref={ref} className="px-6 md:px-16 py-28 md:py-36">
+      <div className="text-center mb-14">
+        <mn.span
+          initial={{ opacity: 0, y: 14 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          className="inline-block text-[11px] tracking-[0.5em] uppercase text-white/60 font-body mb-3"
+        >
+          The mathematics of you
+        </mn.span>
+        <mn.h2
+          initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7, delay: 0.1, ease: 'easeOut' }}
+          className="font-heading italic text-white text-4xl md:text-5xl"
+        >
+          Your Life in Numbers
+        </mn.h2>
+      </div>
+
+      <div className="liquid-glass grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 rounded-3xl overflow-hidden max-w-5xl mx-auto">
+        {items.map((it, i) => (
+          <mn.div
+            key={it.lbl}
+            initial={{ opacity: 0, y: 24 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: i * 0.08, ease: 'easeOut' }}
+            className="p-9 border-white/10"
+            style={{ borderRight: (i % 3 !== 2) ? '1px solid rgba(255,255,255,0.08)' : 'none', borderBottom: i < 3 ? '1px solid rgba(255,255,255,0.08)' : 'none' }}
+          >
+            <div className="text-lg opacity-50 mb-4">{it.icon}</div>
+            <div className="font-heading italic text-white text-3xl md:text-4xl leading-none">{it.val}</div>
+            <div className="text-[11px] tracking-[0.25em] uppercase text-white/50 font-body mt-2">{it.lbl}</div>
+            <div className="text-sm text-white/40 italic font-heading mt-1">{it.sub}</div>
+          </mn.div>
+        ))}
+      </div>
+    </section>
+  );
+};
+</script>
+
+<!-- Wishes -->
+<script type="text/babel">
+const { motion: mw, useInView: uivw } = window.Motion;
+
+const WISHES = [
+  { text: 'May every single one of your dreams know your name, and find its way to you this year, Rumana.', from: '✦ A heartfelt wish' },
+  { text: 'You hold a rare kind of light — the kind that makes rooms feel warmer and moments feel softer. Never lose it.', from: '✦ With admiration' },
+  { text: 'On this day, something beautiful was added to the world. And all these years later, it still is.', from: '✦ Always true' },
+  { text: 'Like fine gold, you only grow more precious with time. Happy Birthday to someone truly extraordinary.', from: '✦ Forever yours' },
+  { text: 'Some people arrive and immediately make the whole world feel like a better place. You are one of them.', from: '✦ Sincerely' },
+  { text: 'May this birthday be the beginning of the most luminous chapter your story has ever held.', from: '✦ With love' },
+];
+
+window.WishesSection = function WishesSection() {
+  const ref = React.useRef(null);
+  const inView = uivw(ref, { threshold: 0.1, once: true });
+
+  return (
+    <section ref={ref} className="px-6 md:px-16 py-28 md:py-36 text-center">
+      <span className="inline-block text-[11px] tracking-[0.5em] uppercase text-white/60 font-body mb-3">From the heart</span>
+      <h2 className="font-heading italic text-white text-4xl md:text-5xl mb-14">Birthday Wishes</h2>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
+        {WISHES.map((w, i) => (
+          <mw.div
+            key={i}
+            initial={{ opacity: 0, y: 28 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: i * 0.08, ease: 'easeOut' }}
+            className="liquid-glass rounded-3xl p-9 text-left hover:bg-white/5 transition-colors"
+          >
+            <div className="font-heading italic text-white/30 text-5xl leading-none mb-3">"</div>
+            <p className="font-heading italic text-white/85 text-base md:text-lg leading-relaxed">{w.text}</p>
+            <div className="mt-6 text-[10px] tracking-[0.3em] uppercase text-white/50 font-body">{w.from}</div>
+          </mw.div>
+        ))}
+      </div>
+    </section>
+  );
+};
+</script>
+
+<!-- Surprise -->
+<script type="text/babel">
+const { motion: ms } = window.Motion;
+
+function launchConfetti(canvas) {
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  canvas.style.display = 'block';
+  const ps = Array.from({ length: 180 }, () => ({
+    x: Math.random()*canvas.width, y: canvas.height*(0.2+Math.random()*0.3),
+    vx: (Math.random()-0.5)*5, vy: -(Math.random()*6+3),
+    w: Math.random()*9+4, h: Math.random()*5+2,
+    rot: Math.random()*360, rv: (Math.random()-0.5)*10,
+    col: ['#ffffff','#cfcfcf','#9e9e9e','#e8e8e8','#bdbdbd'][Math.floor(Math.random()*5)],
+    alpha: 1,
+  }));
+  let fr = 0;
+  (function f() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ps.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.vy += 0.12; p.rot += p.rv;
+      if (fr > 120) p.alpha = Math.max(0, p.alpha - 0.008);
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
+      ctx.globalAlpha = p.alpha; ctx.fillStyle = p.col;
+      ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore();
+    });
+    fr++;
+    if (fr < 260) requestAnimationFrame(f);
+    else canvas.style.display = 'none';
+  })();
+}
+
+window.SurpriseSection = function SurpriseSection() {
+  const [revealed, setRevealed] = React.useState(false);
+  const canvasRef = React.useRef(null);
+
+  const onReveal = () => {
+    launchConfetti(canvasRef.current);
+    setRevealed(true);
+  };
+
+  return (
+    <section className="px-6 py-28 md:py-36 text-center relative">
+      <canvas ref={canvasRef} style={{ position:'fixed', inset:0, zIndex:8000, pointerEvents:'none', display:'none' }} />
+      <div className="max-w-xl mx-auto">
+        <span className="inline-block text-[11px] tracking-[0.5em] uppercase text-white/60 font-body mb-3">Something special</span>
+        <h2 className="font-heading italic text-white text-4xl md:text-5xl mb-6">A Surprise for You</h2>
+        <p className="font-heading italic text-white/60 text-base md:text-lg mb-10">One tap away from a moment made just for you.</p>
+
+        <button
+          onClick={onReveal}
+          className="liquid-glass-strong rounded-full px-8 py-4 inline-flex items-center gap-3 text-white font-heading italic text-lg hover:bg-white/5 transition-colors"
+        >
+          <span>✦</span>
+          <span>Reveal Surprise</span>
+        </button>
+
+        <ms.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={revealed ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.9, ease: 'easeOut' }}
+          className="mt-14"
+          style={{ pointerEvents: revealed ? 'auto' : 'none' }}
+        >
+          {revealed && (
+            <>
+              <div className="font-heading italic text-white text-4xl md:text-5xl leading-tight mb-4">Happy Birthday,<br/>Rumana.</div>
+              <p className="font-heading italic text-white/65 text-base md:text-lg leading-relaxed">
+                The world is richer, warmer, and more full of wonder because you exist in it. On your special day and every day — you are seen, you are loved, you are everything.
+              </p>
+              <div className="mt-8 text-xs tracking-[0.4em] uppercase text-white/60 font-body">June 19, 2007 — Forever celebrated</div>
+            </>
+          )}
+        </ms.div>
+      </div>
+    </section>
+  );
+};
+</script>
+
+<!-- Footer -->
+<script type="text/babel">
+window.Footer = function Footer() {
+  return (
+    <footer className="relative px-6 py-24 text-center overflow-hidden border-t border-white/10">
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 flex items-center justify-center font-heading italic text-white leading-none pointer-events-none select-none"
+        style={{ fontSize: 'clamp(3rem,10vw,7rem)', opacity: 0.06 }}
+      >
+        Rumana
+      </div>
+      <div className="relative">
+        <p className="font-heading italic text-white/60 text-lg md:text-2xl mb-3">To the one who makes the world more beautiful simply by being in it.</p>
+        <p className="text-xs tracking-[0.4em] uppercase text-white/60 font-body mt-3">19 · June · 2007</p>
+        <p className="mt-10 text-[10px] tracking-[0.25em] uppercase text-white/15 font-body">Made with quiet admiration ✦</p>
+      </div>
+    </footer>
+  );
+};
+</script>
+
+<!-- App root -->
+<script type="text/babel">
+const origError = console.error;
+console.error = (...args) => {
+  if (typeof args[0] === 'string' && args[0].includes('Each child in a list')) return;
+  origError(...args);
+};
+
+function App() {
+  return (
+    <div>
+      <Loader />
+      <MusicButton />
+      <Navbar />
+      <HeroSection />
+      <CountdownSection />
+      <Divider glyph="◇" />
+      <NumbersSection />
+      <Divider glyph="✦" />
+      <WishesSection />
+      <Divider glyph="✦" />
+      <SurpriseSection />
+      <Footer />
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>
