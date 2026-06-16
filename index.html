@@ -27,6 +27,67 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { background: #000; color: #fff; overflow-x: hidden; }
   #root { min-height: 100vh; }
+  #particles-canvas{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  opacity:.35;
+}
+
+#cursor-glow{
+  position:fixed;
+  pointer-events:none;
+  z-index:9998;
+  width:320px;
+  height:320px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(167,139,250,.07) 0%,rgba(244,114,182,.03) 45%,transparent 70%);
+  transform:translate(-50%,-50%);
+  transition: opacity .3s ease;
+}
+
+#scroll-bar{
+  position:fixed;
+  top:0;
+  left:0;
+  height:2px;
+  z-index:9999;
+  width:0%;
+  background:linear-gradient(to right,
+  rgba(255,255,255,.2),
+  rgba(255,255,255,.8));
+}
+
+#page-veil{
+  position:fixed;
+  inset:0;
+  background:#000;
+  z-index:99999;
+  animation:veilOut 1s ease forwards;
+}
+
+@keyframes veilOut{
+  from{opacity:1}
+  to{opacity:0;visibility:hidden}
+}
+
+.shimmer-text{
+  background:linear-gradient(
+  90deg,
+  rgba(255,255,255,.6),
+  white,
+  rgba(255,255,255,.6));
+  background-size:200%;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:shimmer 4s linear infinite;
+}
+
+@keyframes shimmer{
+  from{background-position:-200%}
+  to{background-position:200%}
+}
 
   /* ── Video background ── */
   #bg-video-wrap {
@@ -115,6 +176,154 @@
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
   }
+
+  /* ══════════ GLOBAL 3D / GLOW / TRANSITION LAYER ══════════ */
+
+  :root{
+    --violet: 167,139,250;
+    --pink: 244,114,182;
+    --cyan: 103,232,249;
+    --glow-soft: 0 0 18px rgba(167,139,250,.25), 0 0 38px rgba(244,114,182,.12);
+  }
+
+  body{ perspective: 1800px; }
+
+  /* smooth global transitions on color/shadow/transform-affecting props */
+  a, button, .liquid-glass, .liquid-glass-strong, h1, h2, h3, p, span, img, svg, .tilt-card {
+    transition: transform .55s cubic-bezier(.16,1,.3,1),
+                box-shadow .55s cubic-bezier(.16,1,.3,1),
+                filter .55s cubic-bezier(.16,1,.3,1),
+                background-color .4s ease,
+                border-color .4s ease,
+                opacity .5s ease;
+  }
+
+  /* ---------- glow halo applied to glass surfaces ---------- */
+  .liquid-glass, .liquid-glass-strong{
+    will-change: transform, box-shadow;
+  }
+  .liquid-glass:hover, .liquid-glass-strong:hover{
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,.08),
+      0 8px 30px -8px rgba(0,0,0,.6),
+      0 0 24px -2px rgba(var(--violet),.35),
+      0 0 46px -4px rgba(var(--pink),.22),
+      inset 0 1px 1px rgba(255,255,255,.15);
+    transform: translateY(-4px) scale(1.015);
+  }
+
+  /* ---------- 3D tilt wrapper (JS sets --rx/--ry/--tz) ---------- */
+  .tilt-card{
+    --rx: 0deg; --ry: 0deg; --tz: 0px;
+    transform-style: preserve-3d;
+    transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) translateZ(var(--tz));
+  }
+
+  /* ---------- glow pulse for accent glyphs / icons ---------- */
+  .glow-pulse{
+    animation: glowPulse 3.2s ease-in-out infinite;
+  }
+  @keyframes glowPulse{
+    0%,100%{ filter: drop-shadow(0 0 4px rgba(var(--violet),.5)) drop-shadow(0 0 10px rgba(var(--pink),.25)); opacity:.7; }
+    50%{ filter: drop-shadow(0 0 12px rgba(var(--cyan),.85)) drop-shadow(0 0 26px rgba(var(--violet),.5)); opacity:1; }
+  }
+
+  /* ---------- text glow on headings ---------- */
+  .text-glow{
+    text-shadow:
+      0 0 14px rgba(var(--violet),.35),
+      0 0 30px rgba(var(--pink),.18);
+  }
+
+  /* ---------- magnetic hover-rotate for buttons/badges ---------- */
+  .hover-rotate{
+    transition: transform .5s cubic-bezier(.34,1.56,.64,1), box-shadow .5s ease;
+  }
+  .hover-rotate:hover{
+    transform: rotate(-3deg) scale(1.07);
+  }
+
+  /* ---------- spin-slow for glyph dividers / orbiting accents ---------- */
+  .spin-slow{ animation: spinSlow 18s linear infinite; display:inline-block; }
+  @keyframes spinSlow{ to{ transform: rotate(360deg); } }
+
+  /* ---------- fade-rise scroll reveal (driven by IntersectionObserver) ---------- */
+  .reveal{
+    opacity: 0;
+    transform: translateY(36px) scale(.97);
+    filter: blur(6px);
+    transition: opacity 1s cubic-bezier(.16,1,.3,1),
+                transform 1s cubic-bezier(.16,1,.3,1),
+                filter 1s cubic-bezier(.16,1,.3,1);
+  }
+  .reveal.is-visible{
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+
+  /* ---------- glow ring sweep for primary CTA ---------- */
+  .glow-ring{ position: relative; }
+  .glow-ring::after{
+    content:"";
+    position:absolute;
+    inset:-2px;
+    border-radius: inherit;
+    background: conic-gradient(from 0deg,
+      rgba(var(--violet),0), rgba(var(--violet),.9),
+      rgba(var(--pink),.9), rgba(var(--cyan),.9),
+      rgba(var(--violet),0));
+    opacity: 0;
+    z-index: -1;
+    filter: blur(10px);
+    transition: opacity .5s ease;
+    animation: ringSpin 6s linear infinite;
+  }
+  .glow-ring:hover::after{ opacity: .85; }
+  @keyframes ringSpin{ to{ transform: rotate(360deg); } }
+
+  /* ---------- shimmer sweep across glass cards on hover ---------- */
+  .sheen{ position: relative; overflow: hidden; }
+  .sheen::before{
+    content:"";
+    position:absolute;
+    top:0; left:-150%;
+    width:60%; height:100%;
+    background: linear-gradient(115deg, transparent, rgba(255,255,255,.16), transparent);
+    transform: skewX(-15deg);
+    transition: left 1.1s cubic-bezier(.16,1,.3,1);
+    pointer-events:none;
+  }
+  .sheen:hover::before{ left:150%; }
+
+  /* ---------- floating idle motion ---------- */
+  .float-y{ animation: floatY 5s ease-in-out infinite; }
+  @keyframes floatY{ 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-8px); } }
+
+  /* ---------- number pop on countdown tick ---------- */
+  @keyframes numPop{ 0%{ transform: scale(1); filter: drop-shadow(0 0 0 rgba(var(--cyan),0)); } 35%{ transform: scale(1.18); filter: drop-shadow(0 0 10px rgba(var(--cyan),.8)); } 100%{ transform: scale(1); filter: drop-shadow(0 0 0 rgba(var(--cyan),0)); } }
+  .num-pop{ animation: numPop .5s ease-out; display:inline-block; }
+
+  /* ---------- confetti / surprise glow burst ---------- */
+  @keyframes burstGlow{
+    0%{ box-shadow: 0 0 0 0 rgba(var(--violet),.6), 0 0 0 0 rgba(var(--pink),.4); }
+    60%{ box-shadow: 0 0 40px 14px rgba(var(--violet),.25), 0 0 80px 30px rgba(var(--pink),.12); }
+    100%{ box-shadow: 0 0 0 0 rgba(var(--violet),0), 0 0 0 0 rgba(var(--pink),0); }
+  }
+  .burst-glow{ animation: burstGlow 1.4s ease-out; }
+
+  /* ---------- scrollbar styling for that polished feel ---------- */
+  ::-webkit-scrollbar{ width: 8px; }
+  ::-webkit-scrollbar-track{ background: transparent; }
+  ::-webkit-scrollbar-thumb{ background: linear-gradient(rgba(var(--violet),.4), rgba(var(--pink),.4)); border-radius: 9999px; }
+
+  /* ---------- selection color matches palette ---------- */
+  ::selection{ background: rgba(var(--violet),.35); color:#fff; }
+
+  /* ---------- divider glyph glow ---------- */
+  .glyph-glow{
+    filter: drop-shadow(0 0 6px rgba(var(--violet),.6));
+  }
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
@@ -126,6 +335,10 @@
 </script>
 </head>
 <body>
+<div id="page-veil"></div>
+<div id="scroll-bar"></div>
+<div id="cursor-glow"></div>
+<canvas id="particles-canvas"></canvas>
 
 <!-- Video background -->
 <div id="bg-video-wrap">
@@ -207,7 +420,7 @@ window.MusicButton = function MusicButton() {
   return (
     <button
       onClick={toggle}
-      className="liquid-glass-strong fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full flex items-center justify-center hover:bg-white/5 transition-colors"
+      className="liquid-glass-strong glow-ring hover-rotate fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full flex items-center justify-center hover:bg-white/5 transition-colors"
       aria-label="Toggle background music"
       title="Toggle music"
     >
@@ -251,7 +464,7 @@ window.Loader = function Loader() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.9, delay: 0.3, ease: 'easeOut' }}
-        className="font-heading italic text-white text-6xl md:text-7xl tracking-[-2px]"
+        className="font-heading italic text-white text-6xl md:text-7xl tracking-[-2px] text-glow"
       >
         Rumana
       </ml.div>
@@ -279,10 +492,10 @@ window.Loader = function Loader() {
 window.Navbar = function Navbar() {
   return (
     <nav className="fixed top-4 left-0 right-0 z-50 px-8 lg:px-16 flex items-center justify-between">
-      <div className="liquid-glass w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
-        <span className="font-heading italic text-white text-xl">r</span>
+      <div className="liquid-glass hover-rotate w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
+        <span className="font-heading italic text-white text-xl glow-pulse">r</span>
       </div>
-      <div className="liquid-glass rounded-full px-5 py-2 text-xs tracking-[0.3em] uppercase text-white/70 font-body hidden sm:block">
+      <div className="liquid-glass sheen rounded-full px-5 py-2 text-xs tracking-[0.3em] uppercase text-white/70 font-body hidden sm:block">
         19 · June · 2007
       </div>
       <div className="w-12 h-12 flex-shrink-0" />
@@ -300,6 +513,9 @@ const HMA = { filter: 'blur(0px)', opacity: 1, y: 0 };
 window.HeroSection = function HeroSection() {
   return (
     <section className="relative min-h-screen overflow-hidden flex flex-col items-center justify-center text-center px-6">
+      <div className="orb float-y" style={{ width: 360, height: 360, top: '8%', left: '-6%', background: 'radial-gradient(circle, rgba(167,139,250,.30), transparent 70%)' }} />
+      <div className="orb float-y" style={{ width: 300, height: 300, bottom: '10%', right: '-4%', background: 'radial-gradient(circle, rgba(244,114,182,.26), transparent 70%)', animationDelay: '1.4s' }} />
+      <div className="orb float-y" style={{ width: 240, height: 240, top: '38%', right: '18%', background: 'radial-gradient(circle, rgba(103,232,249,.22), transparent 70%)', animationDelay: '2.2s' }} />
       <mh.p
         initial={HMI} animate={HMA} transition={{ duration: 0.7, delay: 2.7, ease: 'easeOut' }}
         className="text-[11px] tracking-[0.55em] uppercase text-white/60 font-body mb-8"
@@ -310,7 +526,7 @@ window.HeroSection = function HeroSection() {
       <BlurText
         text="Rumana"
         as="h1"
-        className="font-heading italic text-white leading-[0.9] tracking-[-2px]"
+        className="font-heading italic text-white leading-[0.9] tracking-[-2px] text-glow"
       />
       <style>{`
         h1.font-heading { font-size: clamp(4.5rem, 16vw, 11rem) !important; }
@@ -405,6 +621,22 @@ window.CountdownSection = function CountdownSection() {
     { key:'s', label:'Seconds' },
   ];
 
+  function handleTilt(e) {
+    const el = e.currentTarget;
+    const r = el.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width - 0.5;
+    const py = (e.clientY - r.top) / r.height - 0.5;
+    el.style.setProperty('--ry', (px * 16) + 'deg');
+    el.style.setProperty('--rx', (-py * 16) + 'deg');
+    el.style.setProperty('--tz', '14px');
+  }
+  function resetTilt(e) {
+    const el = e.currentTarget;
+    el.style.setProperty('--ry', '0deg');
+    el.style.setProperty('--rx', '0deg');
+    el.style.setProperty('--tz', '0px');
+  }
+
   return (
     <section ref={ref} className="relative py-28 md:py-36 px-6 text-center">
       <mcd.span
@@ -417,7 +649,7 @@ window.CountdownSection = function CountdownSection() {
       <mcd.h2
         initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.7, delay: 0.1, ease: 'easeOut' }}
-        className="font-heading italic text-white text-4xl md:text-5xl"
+        className="font-heading italic text-white text-4xl md:text-5xl text-glow"
       >
         The Countdown
       </mcd.h2>
@@ -428,15 +660,15 @@ window.CountdownSection = function CountdownSection() {
         className="flex justify-center gap-6 md:gap-10 flex-wrap mt-14"
       >
         {units.map(u => (
-          <div key={u.key} className="flex flex-col items-center gap-3">
-            <div className="liquid-glass relative rounded-full" style={{ width: 'clamp(88px,16vw,120px)', height: 'clamp(88px,16vw,120px)' }}>
+          <div key={u.key} className="flex flex-col items-center gap-3 tilt-card" onMouseMove={handleTilt} onMouseLeave={resetTilt}>
+            <div className="liquid-glass glow-ring relative rounded-full" style={{ width: 'clamp(88px,16vw,120px)', height: 'clamp(88px,16vw,120px)' }}>
               <svg viewBox="0 0 100 100" width="100%" height="100%" style={{ position:'absolute', inset:0, transform:'rotate(-90deg)' }}>
                 <circle cx="50" cy="50" r="44" fill="none" strokeWidth="1.5" stroke="rgba(255,255,255,0.12)" />
                 <circle cx="50" cy="50" r="44" fill="none" strokeWidth="1.5" stroke="white" strokeLinecap="round"
                   strokeDasharray={C} strokeDashoffset={offsets[u.key]}
-                  style={{ transition: 'stroke-dashoffset .8s cubic-bezier(.4,0,.2,1)' }} />
+                  style={{ transition: 'stroke-dashoffset .8s cubic-bezier(.4,0,.2,1)', filter: 'drop-shadow(0 0 6px rgba(167,139,250,.7))' }} />
               </svg>
-              <div className="absolute inset-0 flex items-center justify-center font-heading italic text-white" style={{ fontSize: 'clamp(1.5rem,3.5vw,2.2rem)' }}>
+              <div key={vals[u.key]} className="num-pop absolute inset-0 flex items-center justify-center font-heading italic text-white" style={{ fontSize: 'clamp(1.5rem,3.5vw,2.2rem)' }}>
                 {vals[u.key]}
               </div>
             </div>
@@ -465,7 +697,7 @@ window.Divider = function Divider({ glyph }) {
   return (
     <div className="flex items-center gap-7 max-w-md mx-auto px-6 py-4">
       <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-      <span className="text-xs text-white/50">{glyph}</span>
+      <span className="text-xs text-white/50 glyph-glow spin-slow">{glyph}</span>
       <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
     </div>
   );
@@ -510,7 +742,7 @@ window.NumbersSection = function NumbersSection() {
         <mn.h2
           initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7, delay: 0.1, ease: 'easeOut' }}
-          className="font-heading italic text-white text-4xl md:text-5xl"
+          className="font-heading italic text-white text-4xl md:text-5xl text-glow"
         >
           Your Life in Numbers
         </mn.h2>
@@ -523,10 +755,23 @@ window.NumbersSection = function NumbersSection() {
             initial={{ opacity: 0, y: 24 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: i * 0.08, ease: 'easeOut' }}
-            className="p-9 border-white/10"
+            className="p-9 border-white/10 sheen tilt-card hover:bg-white/5"
+            onMouseMove={(e)=>{
+              const el=e.currentTarget, r=el.getBoundingClientRect();
+              const px=(e.clientX-r.left)/r.width-0.5, py=(e.clientY-r.top)/r.height-0.5;
+              el.style.setProperty('--ry',(px*10)+'deg');
+              el.style.setProperty('--rx',(-py*10)+'deg');
+              el.style.setProperty('--tz','8px');
+            }}
+            onMouseLeave={(e)=>{
+              const el=e.currentTarget;
+              el.style.setProperty('--ry','0deg');
+              el.style.setProperty('--rx','0deg');
+              el.style.setProperty('--tz','0px');
+            }}
             style={{ borderRight: (i % 3 !== 2) ? '1px solid rgba(255,255,255,0.08)' : 'none', borderBottom: i < 3 ? '1px solid rgba(255,255,255,0.08)' : 'none' }}
           >
-            <div className="text-lg opacity-50 mb-4">{it.icon}</div>
+            <div className="text-lg opacity-50 mb-4 glow-pulse">{it.icon}</div>
             <div className="font-heading italic text-white text-3xl md:text-4xl leading-none">{it.val}</div>
             <div className="text-[11px] tracking-[0.25em] uppercase text-white/50 font-body mt-2">{it.lbl}</div>
             <div className="text-sm text-white/40 italic font-heading mt-1">{it.sub}</div>
@@ -558,7 +803,7 @@ window.WishesSection = function WishesSection() {
   return (
     <section ref={ref} className="px-6 md:px-16 py-28 md:py-36 text-center">
       <span className="inline-block text-[11px] tracking-[0.5em] uppercase text-white/60 font-body mb-3">From the heart</span>
-      <h2 className="font-heading italic text-white text-4xl md:text-5xl mb-14">Birthday Wishes</h2>
+      <h2 className="font-heading italic text-white text-4xl shimmer-text md:text-5xl mb-14">Birthday Wishes</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
         {WISHES.map((w, i) => (
@@ -567,9 +812,22 @@ window.WishesSection = function WishesSection() {
             initial={{ opacity: 0, y: 28 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: i * 0.08, ease: 'easeOut' }}
-            className="liquid-glass rounded-3xl p-9 text-left hover:bg-white/5 transition-colors"
+            className="liquid-glass sheen tilt-card rounded-3xl p-9 text-left hover:bg-white/5 transition-colors"
+            onMouseMove={(e)=>{
+              const el=e.currentTarget, r=el.getBoundingClientRect();
+              const px=(e.clientX-r.left)/r.width-0.5, py=(e.clientY-r.top)/r.height-0.5;
+              el.style.setProperty('--ry',(px*8)+'deg');
+              el.style.setProperty('--rx',(-py*8)+'deg');
+              el.style.setProperty('--tz','10px');
+            }}
+            onMouseLeave={(e)=>{
+              const el=e.currentTarget;
+              el.style.setProperty('--ry','0deg');
+              el.style.setProperty('--rx','0deg');
+              el.style.setProperty('--tz','0px');
+            }}
           >
-            <div className="font-heading italic text-white/30 text-5xl leading-none mb-3">"</div>
+            <div className="font-heading italic text-white/30 text-5xl leading-none mb-3 glow-pulse">"</div>
             <p className="font-heading italic text-white/85 text-base md:text-lg leading-relaxed">{w.text}</p>
             <div className="mt-6 text-[10px] tracking-[0.3em] uppercase text-white/50 font-body">{w.from}</div>
           </mw.div>
@@ -616,38 +874,56 @@ function launchConfetti(canvas) {
 window.SurpriseSection = function SurpriseSection() {
   const [revealed, setRevealed] = React.useState(false);
   const canvasRef = React.useRef(null);
+  const btnRef = React.useRef(null);
 
   const onReveal = () => {
     launchConfetti(canvasRef.current);
     setRevealed(true);
+    if (btnRef.current) {
+      btnRef.current.classList.add('burst-glow');
+      setTimeout(() => btnRef.current && btnRef.current.classList.remove('burst-glow'), 1500);
+    }
   };
+
+  const magnetMove = (e) => {
+    const el = e.currentTarget, r = el.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width - 0.5;
+    const py = (e.clientY - r.top) / r.height - 0.5;
+    el.style.transform = `translate(${px*10}px, ${py*10}px) scale(1.04)`;
+  };
+  const magnetLeave = (e) => { e.currentTarget.style.transform = ''; };
 
   return (
     <section className="px-6 py-28 md:py-36 text-center relative">
       <canvas ref={canvasRef} style={{ position:'fixed', inset:0, zIndex:8000, pointerEvents:'none', display:'none' }} />
       <div className="max-w-xl mx-auto">
         <span className="inline-block text-[11px] tracking-[0.5em] uppercase text-white/60 font-body mb-3">Something special</span>
-        <h2 className="font-heading italic text-white text-4xl md:text-5xl mb-6">A Surprise for You</h2>
+        <h2 className="font-heading italic text-white text-4xl shimmer-text md:text-5xl mb-6 text-glow">A Surprise for You</h2>
         <p className="font-heading italic text-white/60 text-base md:text-lg mb-10">One tap away from a moment made just for you.</p>
 
-        <button
-          onClick={onReveal}
-          className="liquid-glass-strong rounded-full px-8 py-4 inline-flex items-center gap-3 text-white font-heading italic text-lg hover:bg-white/5 transition-colors"
-        >
-          <span>✦</span>
-          <span>Reveal Surprise</span>
-        </button>
+        {!revealed && (
+          <button
+            ref={btnRef}
+            onClick={onReveal}
+            onMouseMove={magnetMove}
+            onMouseLeave={magnetLeave}
+            className="liquid-glass-strong glow-ring sheen rounded-full px-8 py-4 inline-flex items-center gap-3 text-white font-heading italic text-lg hover:bg-white/5 transition-colors float-y"
+          >
+            <span className="glow-pulse">✦</span>
+            <span>Reveal Surprise</span>
+          </button>
+        )}
 
         <ms.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={revealed ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.9, ease: 'easeOut' }}
+          initial={{ opacity: 0, y: 16, scale: 0.94, filter: 'blur(8px)' }}
+          animate={revealed ? { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' } : {}}
+          transition={{ duration: 1.1, ease: 'easeOut' }}
           className="mt-14"
           style={{ pointerEvents: revealed ? 'auto' : 'none' }}
         >
           {revealed && (
             <>
-              <div className="font-heading italic text-white text-4xl md:text-5xl leading-tight mb-4">Happy Birthday,<br/>Rumana.</div>
+              <div className="font-heading italic text-white text-4xl md:text-5xl leading-tight mb-4 text-glow">Happy Birthday,<br/>Rumana.</div>
               <p className="font-heading italic text-white/65 text-base md:text-lg leading-relaxed">
                 The world is richer, warmer, and more full of wonder because you exist in it. On your special day and every day — you are seen, you are loved, you are everything.
               </p>
@@ -674,9 +950,9 @@ window.Footer = function Footer() {
         Rumana
       </div>
       <div className="relative">
-        <p className="font-heading italic text-white/60 text-lg md:text-2xl mb-3">To the one who makes the world more beautiful simply by being in it.</p>
+        <p className="font-heading italic text-white/60 text-lg md:text-2xl mb-3 text-glow">To the one who makes the world more beautiful simply by being in it.</p>
         <p className="text-xs tracking-[0.4em] uppercase text-white/60 font-body mt-3">19 · June · 2007</p>
-        <p className="mt-10 text-[10px] tracking-[0.25em] uppercase text-white/15 font-body">Made with quiet admiration ✦</p>
+        <p className="mt-10 text-[10px] tracking-[0.25em] uppercase text-white/15 font-body">Made with quiet admiration <span className="glow-pulse">✦</span></p>
       </div>
     </footer>
   );
@@ -722,5 +998,161 @@ function App() {
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
 </script>
+<script>
+// cursor glow
+const glow=document.getElementById("cursor-glow");
+
+document.addEventListener("mousemove",(e)=>{
+  glow.style.left=e.clientX+"px";
+  glow.style.top=e.clientY+"px";
+});
+
+// scroll progress
+const bar=document.getElementById("scroll-bar");
+
+window.addEventListener("scroll",()=>{
+  const p=(window.scrollY/
+  (document.body.scrollHeight-window.innerHeight))*100;
+
+  bar.style.width=p+"%";
+});
+
+// particles — interactive glowing constellation
+(()=>{
+ const canvas=document.getElementById("particles-canvas");
+ const ctx=canvas.getContext("2d");
+ const mouse = { x: -9999, y: -9999 };
+
+ function resize(){
+   canvas.width=innerWidth;
+   canvas.height=innerHeight;
+ }
+ resize();
+ addEventListener("resize",resize);
+ addEventListener("mousemove", (e)=>{ mouse.x = e.clientX; mouse.y = e.clientY; });
+ addEventListener("mouseleave", ()=>{ mouse.x = -9999; mouse.y = -9999; });
+
+ const PALETTE = ['167,139,250','244,114,182','103,232,249','255,255,255'];
+
+ const dots=Array.from({length:70},()=>({
+   x:Math.random()*innerWidth,
+   y:Math.random()*innerHeight,
+   vx:(Math.random()-0.5)*0.25,
+   vy:(Math.random()-0.5)*0.25,
+   r:Math.random()*1.6+0.6,
+   col: PALETTE[Math.floor(Math.random()*PALETTE.length)],
+ }));
+
+ function draw(){
+   ctx.clearRect(0,0,canvas.width,canvas.height);
+
+   // connecting constellation lines
+   for (let i=0;i<dots.length;i++){
+     for (let j=i+1;j<dots.length;j++){
+       const dx=dots[i].x-dots[j].x, dy=dots[i].y-dots[j].y;
+       const dist=Math.sqrt(dx*dx+dy*dy);
+       if (dist<120){
+         ctx.beginPath();
+         ctx.moveTo(dots[i].x,dots[i].y);
+         ctx.lineTo(dots[j].x,dots[j].y);
+         ctx.strokeStyle=`rgba(167,139,250,${0.12*(1-dist/120)})`;
+         ctx.lineWidth=0.6;
+         ctx.stroke();
+       }
+     }
+     // line to cursor for nearby dots — constellation reacts to user
+     const mdx=dots[i].x-mouse.x, mdy=dots[i].y-mouse.y;
+     const mdist=Math.sqrt(mdx*mdx+mdy*mdy);
+     if (mdist<150){
+       ctx.beginPath();
+       ctx.moveTo(dots[i].x,dots[i].y);
+       ctx.lineTo(mouse.x,mouse.y);
+       ctx.strokeStyle=`rgba(244,114,182,${0.25*(1-mdist/150)})`;
+       ctx.lineWidth=0.8;
+       ctx.stroke();
+     }
+   }
+
+   dots.forEach(d=>{
+     d.x+=d.vx; d.y+=d.vy;
+     if (d.x<0) d.x=innerWidth; if (d.x>innerWidth) d.x=0;
+     if (d.y<0) d.y=innerHeight; if (d.y>innerHeight) d.y=0;
+
+     ctx.beginPath();
+     ctx.arc(d.x,d.y,d.r*2.6,0,Math.PI*2);
+     ctx.fillStyle=`rgba(${d.col},.08)`;
+     ctx.fill();
+
+     ctx.beginPath();
+     ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
+     ctx.fillStyle=`rgba(${d.col},.65)`;
+     ctx.fill();
+   });
+
+   requestAnimationFrame(draw);
+ }
+
+ draw();
+})();
+
+// scroll-reveal: fade/rise/blur-in for sections & cards as they enter viewport
+(()=>{
+  function applyReveal(){
+    const targets = document.querySelectorAll('section, .liquid-glass, .liquid-glass-strong');
+    targets.forEach(el=>{
+      if (!el.classList.contains('reveal') && !el.dataset.revealSkip){
+        el.classList.add('reveal');
+      }
+    });
+  }
+  // Run repeatedly for first few seconds since React renders async
+  let tries = 0;
+  const iv = setInterval(()=>{
+    applyReveal();
+    tries++;
+    if (tries > 40) clearInterval(iv);
+  }, 150);
+
+  const observer = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if (entry.isIntersecting){
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+
+  const observeIv = setInterval(()=>{
+    document.querySelectorAll('.reveal:not(.is-visible)').forEach(el=>observer.observe(el));
+  }, 200);
+  setTimeout(()=>clearInterval(observeIv), 8000);
+})();
+
+// global 3D tilt for any liquid-glass surface not already wired with a custom handler
+(()=>{
+  function wire(){
+    document.querySelectorAll('.liquid-glass, .liquid-glass-strong').forEach(el=>{
+      if (el.dataset.tiltWired) return;
+      el.dataset.tiltWired = '1';
+      el.classList.add('tilt-card');
+      el.addEventListener('mousemove', (e)=>{
+        const r = el.getBoundingClientRect();
+        const px = (e.clientX - r.left)/r.width - 0.5;
+        const py = (e.clientY - r.top)/r.height - 0.5;
+        el.style.setProperty('--ry', (px*6)+'deg');
+        el.style.setProperty('--rx', (-py*6)+'deg');
+        el.style.setProperty('--tz', '4px');
+      });
+      el.addEventListener('mouseleave', ()=>{
+        el.style.setProperty('--ry','0deg');
+        el.style.setProperty('--rx','0deg');
+        el.style.setProperty('--tz','0px');
+      });
+    });
+  }
+  let tries = 0;
+  const iv = setInterval(()=>{ wire(); tries++; if (tries>40) clearInterval(iv); }, 150);
+})();
+</script>
+
 </body>
-</html>
