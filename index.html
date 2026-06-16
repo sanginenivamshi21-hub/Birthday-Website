@@ -9,6 +9,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
+document.getElementById("bgVideo").addEventListener("error", () => {
+  console.log("Video failed to load");
+});
+</script>
+<script>
   tailwind.config = {
     theme: {
       extend: {
