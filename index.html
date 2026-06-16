@@ -9,11 +9,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
-document.getElementById("bgVideo").addEventListener("error", () => {
-  console.log("Video failed to load");
-});
-</script>
-<script>
   tailwind.config = {
     theme: {
       extend: {
@@ -134,8 +129,8 @@ document.getElementById("bgVideo").addEventListener("error", () => {
 
 <!-- Video background -->
 <div id="bg-video-wrap">
-  <video autoplay muted loop playsinline>
-    <source src="bg_video.mp4" type="video/mp4">
+  <video id="bgVideo" autoplay muted loop playsinline>
+    <source src="./bg_video.mp4" type="video/mp4">
   </video>
 </div>
 
@@ -686,6 +681,15 @@ window.Footer = function Footer() {
     </footer>
   );
 };
+</script>
+<script>
+const video = document.getElementById("bgVideo");
+
+video.addEventListener("error", () => {
+  console.log("Video failed to load");
+});
+
+console.log(video.currentSrc);
 </script>
 
 <!-- App root -->
